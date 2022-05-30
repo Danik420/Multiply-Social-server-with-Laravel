@@ -12,7 +12,7 @@ class Post extends Model
         [
             'user_id',
             'user_name',
-            'profileImageURL',
+            'profile_image_url',
             'title' => 'required',
             'body' => 'required',
             'thumbnail',

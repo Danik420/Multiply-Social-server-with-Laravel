@@ -5,9 +5,11 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-
+use DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\Registered;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Storage;
 
 class UserAuthController extends Controller
 {
@@ -38,8 +40,8 @@ class UserAuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => $data['password'],
-            'avatar' => $request->avatar,
-            'phoneNumber' => $request->phoneNumber,
+            'profile_image_url' => $request->profileImageUrl,
+            'phone_Number' => $request->phoneNumber,
             //'email_token' => mt_rand(100000, 999999),
         ]);
 
@@ -83,7 +85,7 @@ class UserAuthController extends Controller
         if (!Auth::attempt($data)){
             return response()->json([
                 'message' => '유효하지 않은 로그인 정보입니다.'
-            ], \Symfony\Component\HttpFoundation\Response::HTTP_UNAUTHORIZED);
+            ], Response::HTTP_UNAUTHORIZED);
         }
 //        if (!auth()->attempt($data)) {
 //            return response(['error_message' => 'Incorrect Details.
@@ -112,19 +114,9 @@ class UserAuthController extends Controller
     // 로그아웃
     public function logout(Request $request)
     {
-
-        $user = User::whereEmail($request->email)->first();
-
-        Auth::guard('web')->logout();
-        // 수정 필요할 수도
-        $request->session()->invalidate();
-
-        $user->tokens()->delete();
-        return response()->json(
-            [
-                'message' => '로그아웃되었습니다'
-            ]
-        );
+        $token = Auth::user()->token();
+        $token->revoke();
+        return response()->json([ 'message' => 'Good bye', ], 200);
     }
 
     // 전체 유저 확인
@@ -136,17 +128,35 @@ class UserAuthController extends Controller
     public function currentUserInfo()
     {
         return response()->json([
-            'user' => Auth::user()
+            'user' => auth()->user()
         ], Response::HTTP_OK);
     }
 
+    // 유저 정보 수정
+    public function update(Request $request, $id)
+    {
+
+        $user = User::find($id);
+
+        if ($request->hasfile('profile_image_url')) {
+            $uploadFile = $request->file('profile_image_url');
+            $fileHashName = time() . '-' . 'profile_image_' . 'of_user:' . $user->id . '.png';
+            // $uploadFile->getClientOriginalName();
+            $filePath = $uploadFile->storeAs('public/profile_images', $fileHashName);
+            $profile_image_url = Storage::disk('local')->url($filePath);
+            $user->profile_image_url = $profile_image_url ?? '';
+        }
+
+//        $user->update($request->all());
+        $user->profile_image_url = $profile_image_url;
+        $user->save();
+
+        return response()->json([
+            'status'=>200,
+            'data'=>$user
+        ]);
+    }
 }
-
-
-
-
-
-
 
 
 

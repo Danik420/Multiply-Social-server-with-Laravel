@@ -40,6 +40,7 @@ Route::prefix('/user')->group(function(){
     // 로그인
     Route::post('/login', [UserAuthController::class, 'login'])->name('user.login');
 
+
     // 포스팅 CRUD
     Route::get('/post', [PostController::class, 'index']);
     Route::get('/post/mypost', [PostController::class, 'mypost']);
@@ -52,10 +53,15 @@ Route::prefix('/user')->group(function(){
 
     // 인증 처리가 된
     Route::middleware('auth:api')->group(function(){
+
+
         // 로그아웃
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('user.logout');
+        // 유저 업데이트
+        Route::post('/update/{id}', [UserAuthController::class, 'update'])->name('user.update');
         // 유저 확인
-        Route::get('/info', [UserAuthController::class, 'currentUserInfo'])->name('user.info');
+        Route::get('/my', [UserAuthController::class, 'currentUserInfo'])->name('user.info');
+        // 유저 목록
         Route::get('/all', [UserAuthController::class, 'fetchUsers'])->name('user.all');
 
     });
