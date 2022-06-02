@@ -40,8 +40,8 @@ class UserAuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => $data['password'],
-            'profile_image_url' => $request->profileImageUrl,
-            'phone_Number' => $request->phoneNumber,
+            'profile_image_url' => $request->profile_image_url,
+            'phone_number' => $request->phone_number,
             //'email_token' => mt_rand(100000, 999999),
         ]);
 
@@ -155,6 +155,25 @@ class UserAuthController extends Controller
             'status'=>200,
             'data'=>$user
         ]);
+    }
+
+    // 프로필 사진 삭제
+    public function deleteProfileImage($id)
+    {
+        $user = User::find($id);
+        if( !unlink( public_path($user->profile_image_url)) ) {
+            return response()->json([
+                'message'=>"failed"
+            ]);
+        }
+        else {
+            $user->profile_image_url = null;
+            $user->save();
+            return response()->json([
+                'status'=>200,
+                'message'=>"success"
+            ]);
+        }
     }
 }
 

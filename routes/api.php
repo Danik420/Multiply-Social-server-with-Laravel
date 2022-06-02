@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\UserAuthController;
 use App\Http\Controllers\API\PostController;
+use App\Http\Controllers\API\CommentController;
 use App\Http\Controllers\API\VerificationController;
 use App\Http\Controllers\API\PasswordResetController;
 use App\Http\Controllers\API\NewPasswordController;
@@ -40,13 +41,20 @@ Route::prefix('/user')->group(function(){
     // 로그인
     Route::post('/login', [UserAuthController::class, 'login'])->name('user.login');
 
-
+    // 포스팅 및 댓글 기능 auth:api 미들웨어로 옮길 예정 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     // 포스팅 CRUD
     Route::get('/post', [PostController::class, 'index']);
-    Route::get('/post/mypost', [PostController::class, 'mypost']);
+    Route::get('/post/my/{id}', [PostController::class, 'myPost']);
     Route::post('/post', [PostController::class, 'store']);
     Route::delete('/post/{id}', [PostController::class, 'destroy']);
     Route::put('/post/{id}', [PostController::class, 'update']);
+
+    // 댓글 CRUD
+    Route::get('/comment/{id}', [CommentController::class, 'index']);
+    Route::get('/comment/my/{id}', [CommentController::class, 'myComment']);
+    Route::post('/comment/{id}', [CommentController::class, 'store']);
+    Route::delete('/comment/{id}', [CommentController::class, 'destroy']);
+    Route::put('/comment/{id}', [CommentController::class, 'update']);
 
     // 리프레시 토큰 - 개발하는 정대리 https://www.youtube.com/watch?v=HHBkRb-Aclw
     // Route::post('/token-refresh', [AuthController::class, 'tokenRefresh'])->name('user.token-refresh');
@@ -54,11 +62,12 @@ Route::prefix('/user')->group(function(){
     // 인증 처리가 된
     Route::middleware('auth:api')->group(function(){
 
-
         // 로그아웃
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('user.logout');
         // 유저 업데이트
         Route::post('/update/{id}', [UserAuthController::class, 'update'])->name('user.update');
+        // 프로필 사진 삭제
+        Route::delete('/delete/profile_image/{id}', [UserAuthController::class, 'deleteProfileImage'])->name('user.deleteProfileImage');
         // 유저 확인
         Route::get('/my', [UserAuthController::class, 'currentUserInfo'])->name('user.info');
         // 유저 목록

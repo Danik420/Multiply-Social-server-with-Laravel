@@ -5,14 +5,14 @@ namespace App\Http\Controllers\API;
 use App;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Input;
 use function redirect;
 
-class PostController extends Controller
+class CommentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,36 +20,31 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-
-    public function index()
+    public function index($id)
     {
 
-//        $post = Post::all(); // ->orderBy('id', 'desc'); //->paginate(5);
+        $post = Post::find($id);
 
-
-        $post = Post::with('user')->get();
-
-//        $post->$request->all()
+        $comment = Comment::with('user')->where('post_id', $post->id)->get();
 
         return response()->json([
             'status'=>'good',
-            'data'=> $post
+            'data'=> $comment
         ],200);
 
     }
 
-    public function myPost($id)
-    {
-        $user = User::find($id);
-        $post = Post::where('user_id',$user->id)->get(); // ->orderBy('id', 'desc'); //->paginate(5);
 
-//        $post->$request->all()
+    public function myComment($id)
+    {
+
+        $user = User::find($id);
+        $myComment = Comment::where('user_id', $user->id)->get(); // ->orderBy('id', 'desc'); //->paginate(5);
 
         return response()->json([
             'status'=>'good',
-            'data'=> $post
+            'data'=> $myComment
         ],200);
-
     }
 
     /**
@@ -66,8 +61,8 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-
-        $validator = Validator::make($data = $request->all(), Post::$rules);
+//        $validator = Validator::make($data = $request->all(), Post::$rules);
+        $validator = Validator::make($request->all(), Comment::$rules);
 
         //  if($request->title == null || $request->body == null){}    --> 위에 Validator랑 같은 기능 코드 예시
         //  해당 기능이 1~2번 쓰이면 상관 없는데 컨트롤러 갯수가 매우 많으면 Validator는 Models\Post에서 규칙($rules)만 수정해 주면 되니까 효율적
@@ -77,15 +72,7 @@ class PostController extends Controller
             return redirect()->back()->withErrors($validator->errors())->withInput();
         }
 
-        $post = new Post;
-
-        if ($request->hasfile('thumbnail')) {
-            $uploadFile = $request->file('thumbnail');
-            $fileHashName = time() . '-' . $uploadFile->getClientOriginalName();
-            $filePath = $uploadFile->storeAs('public/thumbnails', $fileHashName);
-            $thumbnail_url = Storage::disk('local')->url($filePath);
-            $post->thumbnail = $thumbnail_url ?? '';
-        }
+        $comment = new Comment;
 
 //        $post->user_id = $request['user_id'];
 ////        $post->user_name = $request['user_name']; // 이거 유저 정보로 수정해야
@@ -94,20 +81,17 @@ class PostController extends Controller
 //
 //        $post->save();
 
-        $post = $post->create([
+        $comment = $comment->create([
+            'post_id' => $request['post_id'],
             'user_id' => $request['user_id'],
-            'title'   => $request['title'],
             'body'    => $request['body']
         ]);
 
         return response()->json([
             'status'=>200,
-            'data'=> $post
+            'data'=> $comment
         ]);
     }
-
-
-
 
     /**
      * Display the specified resource.
@@ -117,9 +101,9 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        $post = Post::findOrFail($id);
+        $comment = Comment::findOrFail($id);
 
-        return view('post.show', compact('post'));
+        return view('comment.show', compact('comment'));
     }
 
     /**
@@ -131,7 +115,7 @@ class PostController extends Controller
 
     public function update(Request $request, $id)
     {
-        $post = Post::find($id);
+        $comment = Comment::find($id);
 //
 //        $validator = Validator::make($request->all(), Post::$rules);
 //
@@ -140,10 +124,10 @@ class PostController extends Controller
 //            return redirect()->back()->withErrors($validator)->withInput();
 //        }
 
-        $post->update($request->all());
+        $comment->update($request->all());
         return response()->json([
             'status'=>200,
-            'data'=>$post
+            'data'=>$comment
         ]);
     }
 
@@ -155,7 +139,7 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        Post::destroy($id);
+        Comment::destroy($id);
         return response()->json([
             'status'=>200
         ]);

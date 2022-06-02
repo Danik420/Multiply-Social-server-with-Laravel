@@ -28,10 +28,10 @@ class AuthServiceProvider extends ServiceProvider
         Passport::routes();
         //
 
-        // 토큰 만료시간 설정
-        Passport::tokensExpireIn(now()->addDays(15));
-        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
-        // 리프레시 토큰 만료시간
-        Passport::refreshTokensExpireIn(now()->addDays(30));
+//        // 토큰 만료시간 설정
+//        Passport::tokensExpireIn(now()->addDays(15));
+//        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+//        // 리프레시 토큰 만료시간
+//        Passport::refreshTokensExpireIn(now()->addDays(30));
     }
 }
