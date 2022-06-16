@@ -26,4 +26,13 @@ class Post extends Model
     {
         return $this->belongsTo(User::class, "user_id", "id");
     }
+
+// 나중에 써먹기
+//    public function stories_images()
+//    {
+//        return $this->hasMany(Image::class, "stories_id", "id");
+//    }
+//    public function markets_images(){
+//        return $this->hasMany(Image::class, "markets_id", "id");
+//    }
 }

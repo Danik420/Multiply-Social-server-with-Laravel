@@ -125,12 +125,7 @@ class UserAuthController extends Controller
     }
 
     // 현재 유저 확인
-    public function currentUserInfo()
-    {
-        return response()->json([
-            'user' => auth()->user()
-        ], Response::HTTP_OK);
-    }
+
 
     // 유저 정보 수정
     public function update(Request $request, $id)

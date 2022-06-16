@@ -23,7 +23,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 */
 
 
-Route::prefix('/user')->group(function(){
+Route::prefix('/user')->group(function () {
     // 회원 가입(메일 전송)
     Route::post('/register', [UserAuthController::class, 'register'])->name('user.register');
     // 인증 버튼
@@ -41,26 +41,34 @@ Route::prefix('/user')->group(function(){
     // 로그인
     Route::post('/login', [UserAuthController::class, 'login'])->name('user.login');
 
-    // 포스팅 및 댓글 기능 auth:api 미들웨어로 옮길 예정 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    // 포스팅 및 댓글 기능 및 my auth:api 미들웨어로 옮길 예정 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     // 포스팅 CRUD
-    Route::get('/post', [PostController::class, 'index']);
-    Route::get('/post/my/{id}', [PostController::class, 'myPost']);
-    Route::post('/post', [PostController::class, 'store']);
-    Route::delete('/post/{id}', [PostController::class, 'destroy']);
-    Route::put('/post/{id}', [PostController::class, 'update']);
-
+    Route::prefix('/post')->group(function () {
+        Route::get('/', [PostController::class, 'index']);
+        Route::post('/', [PostController::class, 'store']);
+        Route::delete('/{id}', [PostController::class, 'destroy']);
+        Route::put('/{id}', [PostController::class, 'update']);
+    });
     // 댓글 CRUD
-    Route::get('/comment/{id}', [CommentController::class, 'index']);
-    Route::get('/comment/my/{id}', [CommentController::class, 'myComment']);
-    Route::post('/comment/{id}', [CommentController::class, 'store']);
-    Route::delete('/comment/{id}', [CommentController::class, 'destroy']);
-    Route::put('/comment/{id}', [CommentController::class, 'update']);
+    Route::prefix('/comment')->group(function () {
+        Route::get('/{id}', [CommentController::class, 'index']);
+        Route::post('/{id}', [CommentController::class, 'store']);
+        Route::delete('/{id}', [CommentController::class, 'destroy']);
+        Route::put('/{id}', [CommentController::class, 'update']);
+    });
+
+    Route::prefix('/my')->group(function () {
+        // 유저 확인
+        Route::get('/', [UserAuthController::class, 'currentUserInfo'])->name('user.info');
+        Route::get('/post/{id}', [PostController::class, 'myPost']);
+        Route::get('/comment/{id}', [CommentController::class, 'myComment']);
+    });
 
     // 리프레시 토큰 - 개발하는 정대리 https://www.youtube.com/watch?v=HHBkRb-Aclw
     // Route::post('/token-refresh', [AuthController::class, 'tokenRefresh'])->name('user.token-refresh');
 
     // 인증 처리가 된
-    Route::middleware('auth:api')->group(function(){
+    Route::middleware('auth:api')->group(function () {
 
         // 로그아웃
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('user.logout');
@@ -68,11 +76,8 @@ Route::prefix('/user')->group(function(){
         Route::post('/update/{id}', [UserAuthController::class, 'update'])->name('user.update');
         // 프로필 사진 삭제
         Route::delete('/delete/profile_image/{id}', [UserAuthController::class, 'deleteProfileImage'])->name('user.deleteProfileImage');
-        // 유저 확인
-        Route::get('/my', [UserAuthController::class, 'currentUserInfo'])->name('user.info');
         // 유저 목록
         Route::get('/all', [UserAuthController::class, 'fetchUsers'])->name('user.all');
-
     });
 });
 

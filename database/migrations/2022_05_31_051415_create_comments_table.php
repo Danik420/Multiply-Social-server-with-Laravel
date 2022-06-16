@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('body');
             $table->timestamps();
 
+            // 경우에 따라 foreign 키 필요 없을 때도 있음.
             $table->foreign('post_id')->references('id')->on('posts')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnUpdate()->cascadeOnDelete();
         });

@@ -34,16 +34,26 @@ class CommentController extends Controller
 
     }
 
-
+    // 내 댓글 달린 게시글이랑 묶어서 같이 가져오는 방식
     public function myComment($id)
     {
 
         $user = User::find($id);
+
         $myComment = Comment::where('user_id', $user->id)->get(); // ->orderBy('id', 'desc'); //->paginate(5);
+        $post_ids = $myComment->pluck('post_id')->toArray();
+        $post_array_unique = array_unique($post_ids);
+        $posts = Post::whereIn('id', $post_array_unique)->get(); // 값이 하나면 where 값이 여러개면 whereIn
+        // 데이터 묶기 map 기능 쩐다
+        $posts->map(function ($post) use ($id){
+            $post->comments =Comment::where('user_id', $id)->where('post_id',$post->id)->get();
+
+            return $post;
+        });
 
         return response()->json([
             'status'=>'good',
-            'data'=> $myComment
+            'data'=> $posts,
         ],200);
     }
 
