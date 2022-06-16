@@ -57,18 +57,22 @@ Route::prefix('/user')->group(function () {
         Route::put('/{id}', [CommentController::class, 'update']);
     });
 
-    Route::prefix('/my')->group(function () {
-        // 유저 확인
-        Route::get('/', [UserAuthController::class, 'currentUserInfo'])->name('user.info');
-        Route::get('/post/{id}', [PostController::class, 'myPost']);
-        Route::get('/comment/{id}', [CommentController::class, 'myComment']);
-    });
+
 
     // 리프레시 토큰 - 개발하는 정대리 https://www.youtube.com/watch?v=HHBkRb-Aclw
     // Route::post('/token-refresh', [AuthController::class, 'tokenRefresh'])->name('user.token-refresh');
 
     // 인증 처리가 된
     Route::middleware('auth:api')->group(function () {
+
+        Route::prefix('/my')->group(function () {
+            // 유저 확인
+            Route::get('/', [UserAuthController::class, 'currentUserInfo'])->name('user.info');
+            // 내가 쓴 글
+            Route::get('/post/{id}', [PostController::class, 'myPost']);
+            // 내가 쓴 댓글
+            Route::get('/comment/{id}', [CommentController::class, 'myComment']);
+        });
 
         // 로그아웃
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('user.logout');
